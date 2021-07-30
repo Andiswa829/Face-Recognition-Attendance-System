@@ -28,9 +28,28 @@ namespace WebApplication1.Controllers
         //}
 
         // GET: Employees
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string sortOrder, string searchString)
         {
-            return View(await db.Employees.Where(x => x.IsDeleted != true).ToListAsync());
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
+            var employees = from s in db.Employees
+                           select s;
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    employees = employees.OrderByDescending(s => s.DisplayName);
+                    break;
+                case "Date":
+                    employees = employees.OrderBy(s => s.EmailAddress );
+                    break;
+                case "date_desc":
+                    employees = employees.OrderByDescending(s => s.FirstName);
+                    break;
+                default:
+                    employees = employees.OrderBy(s => s.Surname);
+                    break;
+            }
+            return View(employees.ToList());
         }
 
         // GET: Employees/Details/5
